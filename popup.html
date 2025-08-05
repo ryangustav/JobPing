@@ -1,0 +1,131 @@
+<!--
+  This file is part of JobPing.
+  Copyright (C) 2025 Ryan Gustavo
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License version 3
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
+-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JobPing</title>
+  <style>
+    :root { --button: #ff6f00 }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      padding: 20px;
+      width: 320px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    h2 {
+      color: #ff6f00;
+      margin-bottom: 20px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #ff9100;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 2px solid #ff6f00;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: #fff;
+      font-size: 14px;
+    }
+
+     input:focus, select:focus {
+      outline: none;
+      border-color: #ffb300;
+      box-shadow: 0 0 8px #ffb300;
+      background-color: #2a2a2a;
+    }
+
+     input[type="text"], select {
+     width: 100%;
+     box-sizing: border-box;
+    }
+
+     input[type="text"] {
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     }
+
+    button {
+      width: 70%;
+      margin: 12px auto;
+      display: block;
+      padding: 7px;
+      background-color: #ff6f00;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ff913d;
+    }
+
+    .status {
+      font-size: 12px;
+      margin-top: 8px;
+      height: 16px;
+      text-align: center;
+    }
+
+    .status.error { color: #ff3d00; }
+    .status.success { color: #4caf50; }
+  </style>
+</head>
+<body>
+  <h2>JobPing</h2>
+
+  <label for="linkedinUrl">LinkedIn job search URL:</label>
+  <input type="text" id="linkedinUrl" placeholder="https://www.linkedin.com/jobs/..." />
+
+  <label for="interval">Check interval:</label>
+  <select id="interval">
+    <option value="60">1 hour</option>
+    <option value="180">3 hours</option>
+    <option value="360">6 hours</option>
+    <option value="720">12 hours</option>
+    <option value="1440">24 hours</option>
+  </select>
+
+  <button id="saveBtn">Save</button>
+  <button id="openLastJobBtn">Open Last Job</button>
+
+  <div class="status" id="statusMsg"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -16,57 +16,228 @@
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  const urlInput = document.getElementById("linkedinUrl");
-  const intervalSelect = document.getElementById("interval");
-  const saveBtn = document.getElementById("saveBtn");
-  const statusMsg = document.getElementById("statusMsg");
-  const openLastJobBtn = document.getElementById("openLastJobBtn");
+  const $ = (id) => document.getElementById(id);
 
-  openLastJobBtn.addEventListener("click", () => {
-    chrome.storage.local.get(["last_job"], (result) => {
-      const link = result.last_job?.link;
-      if (link) {
-        chrome.tabs.create({ url: link });
-      } else {
-        alert("No saved job to open.");
+  const urlInput = $("linkedinUrl");
+  const intervalSel = $("interval");
+  const saveStatus = $("saveStatus");
+  const pauseToggle = $("pauseToggle");
+
+  let saved = {};
+  let statusTimer = null;
+
+  $("version").textContent = chrome.runtime.getManifest().version;
+
+  chrome.storage.local.get(
+    ["jobping_url", "jobping_interval", "jobping_paused", "last_job", "jobping_history", "jobping_alarm_time", "jobping_terms_accepted"],
+    (result) => {
+      saved = result;
+
+      if (!result.jobping_terms_accepted) {
+        $("termsGate").hidden = false;
+        return;
       }
+
+      showMain();
+    }
+  );
+
+  // first run
+  $("termsCheckbox").addEventListener("change", (e) => {
+    $("termsAcceptBtn").disabled = !e.target.checked;
+  });
+
+  $("termsAcceptBtn").addEventListener("click", () => {
+    saved.jobping_terms_accepted = Date.now();
+    chrome.storage.local.set({ jobping_terms_accepted: saved.jobping_terms_accepted }, () => {
+      $("termsGate").hidden = true;
+      showMain();
+      chrome.runtime.sendMessage({ type: "configUpdated" });
     });
   });
 
-  chrome.storage.local.get(["jobping_url", "jobping_interval"], (result) => {
-    if (result.jobping_url) urlInput.value = result.jobping_url;
-    if (result.jobping_interval) intervalSelect.value = result.jobping_interval;
+  function showMain() {
+    $("mainContent").hidden = false;
+    $("switchWrap").hidden = false;
+
+    pauseToggle.checked = !saved.jobping_paused;
+    updateStatusLabel();
+
+    // older versions only saved last_job
+    renderHistory(saved.jobping_history || (saved.last_job ? [saved.last_job] : []));
+
+    if (saved.jobping_url) showWatching();
+    else showForm();
+  }
+
+  // watching card
+  function showWatching() {
+    const { title, sub } = describeSearch(saved.jobping_url);
+    const interval = saved.jobping_interval || 60;
+
+    $("watchTitle").textContent = title;
+    $("watchSub").textContent = [sub, `every ${formatInterval(interval)}`].filter(Boolean).join(" · ");
+    updateNextCheck();
+
+    $("watchCard").hidden = false;
+    $("formCard").hidden = true;
+  }
+
+  function showForm() {
+    urlInput.value = saved.jobping_url || "";
+    intervalSel.value = saved.jobping_interval || 60;
+    urlInput.classList.remove("invalid");
+
+    $("formTitle").textContent = saved.jobping_url ? "Edit search" : "Set up your search";
+    $("cancelBtn").hidden = !saved.jobping_url;
+    $("watchCard").hidden = true;
+    $("formCard").hidden = false;
+    urlInput.focus();
+  }
+
+  $("editBtn").addEventListener("click", showForm);
+  $("cancelBtn").addEventListener("click", showWatching);
+
+  // pull "keywords" and "location" out of the search URL so the user sees what is being watched
+  function describeSearch(url) {
+    try {
+      const params = new URL(url).searchParams;
+      const keywords = params.get("keywords");
+      const location = params.get("location");
+      const remote = params.get("f_WT") === "2" ? "Remote" : null;
+      return {
+        title: keywords || "Your LinkedIn search",
+        sub: [location, remote].filter(Boolean).join(", ")
+      };
+    } catch {
+      return { title: "Your LinkedIn search", sub: "" };
+    }
+  }
+
+  function formatInterval(minutes) {
+    const h = minutes / 60;
+    return h === 1 ? "hour" : `${h} hours`;
+  }
+
+  function updateNextCheck() {
+    const el = $("nextCheck");
+    if (saved.jobping_paused) {
+      el.textContent = "Paused";
+      return;
+    }
+    if (!saved.jobping_alarm_time) {
+      el.textContent = "";
+      return;
+    }
+    const time = new Date(saved.jobping_alarm_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    el.textContent = `Next check at ${time}`;
+  }
+
+  // form
+  const isValidUrl = (url) => url.startsWith("https://www.linkedin.com/jobs");
+
+  urlInput.addEventListener("input", () => {
+    const url = urlInput.value.trim();
+    urlInput.classList.toggle("invalid", url !== "" && !isValidUrl(url));
   });
 
-  saveBtn.addEventListener("click", () => {
-    let url = urlInput.value.trim();
+  $("saveBtn").addEventListener("click", () => {
+    const raw = urlInput.value.trim();
 
-    if (!url.startsWith("https://www.linkedin.com/jobs")) {
-      statusMsg.textContent = "Invalid LinkedIn job search URL.";
-      statusMsg.style.color = "red";
+    if (!isValidUrl(raw)) {
+      urlInput.classList.add("invalid");
+      showStatus("That doesn't look like a LinkedIn jobs URL.", true);
       return;
     }
 
-    const interval = parseInt(intervalSelect.value);
-    const seconds = interval * 60;
-    const f_TPR_value = `r${seconds}`;
+    const interval = parseInt(intervalSel.value);
 
-    const urlObj = new URL(url);
-    urlObj.searchParams.set("f_TPR", f_TPR_value);
-    url = urlObj.toString();
-    urlInput.value = url;
+    // only jobs posted inside the interval, newest first
+    const urlObj = new URL(raw);
+    urlObj.searchParams.set("f_TPR", `r${interval * 60}`);
+    urlObj.searchParams.set("sortBy", "DD");
 
-    chrome.storage.local.set(
-      {
-        jobping_url: url,
-        jobping_interval: interval
-      },
-      () => {
-        statusMsg.textContent = `Settings saved! Interval: ${interval} minutes`;
-        statusMsg.style.color = "green";
+    const data = {
+      jobping_url: urlObj.toString(),
+      jobping_interval: interval,
+      jobping_alarm_time: Date.now() + interval * 60 * 1000
+    };
 
-        chrome.runtime.sendMessage({ type: "configUpdated" });
-      }
-    );
+    chrome.storage.local.set(data, () => {
+      Object.assign(saved, data);
+      chrome.runtime.sendMessage({ type: "configUpdated" });
+      showWatching();
+      showStatus("Saved. You'll get a notification when a new job shows up.");
+    });
   });
+
+  $("checkNowBtn").addEventListener("click", (e) => {
+    if (saved.jobping_paused) {
+      showStatus("JobPing is off, turn it on first.", true);
+      return;
+    }
+    e.target.disabled = true;
+    e.target.textContent = "Checking…";
+    chrome.runtime.sendMessage({ type: "checkNow" });
+    setTimeout(() => {
+      e.target.disabled = false;
+      e.target.textContent = "Check now";
+    }, 4000);
+  });
+
+  // on/off switch
+  pauseToggle.addEventListener("change", () => {
+    const paused = !pauseToggle.checked;
+    chrome.storage.local.set({ jobping_paused: paused }, () => {
+      saved.jobping_paused = paused;
+      chrome.runtime.sendMessage({ type: "toggleMonitoring", paused });
+      updateStatusLabel();
+      // setupAlarm writes a new alarm time when resuming
+      setTimeout(() => {
+        chrome.storage.local.get(["jobping_alarm_time"], (r) => {
+          saved.jobping_alarm_time = r.jobping_alarm_time;
+          updateNextCheck();
+        });
+      }, 300);
+    });
+  });
+
+  function updateStatusLabel() {
+    $("statusLabel").textContent = saved.jobping_paused ? "Off" : "On";
+    updateNextCheck();
+  }
+
+  function showStatus(msg, isError) {
+    saveStatus.textContent = msg;
+    saveStatus.className = isError ? "error" : "";
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => (saveStatus.textContent = ""), 4000);
+  }
+
+  // jobs list
+  function renderHistory(history) {
+    if (!history.length) return;
+
+    $("historyList").innerHTML = history.map((job, i) => `
+      <li>
+        <a href="${esc(job.link)}" target="_blank" rel="noopener">
+          <span class="avatar">${esc((job.company || "?").trim().charAt(0).toUpperCase())}</span>
+          <span class="job-info">
+            <div class="job-title">${esc(job.title || "Untitled")}</div>
+            <div class="job-meta">${esc(job.company || "")}${job.time ? " · " + esc(job.time) : ""}</div>
+          </span>
+          ${i === 0 ? '<span class="new-tag">Latest</span>' : ""}
+        </a>
+      </li>
+    `).join("");
+  }
+
+  function esc(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
 });

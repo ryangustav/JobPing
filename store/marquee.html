@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1400px; height: 560px; }
+  body { background: #e4572e; color: #fff; padding: 0 0 0 100px; gap: 0; overflow: hidden; }
+  .copy { flex: 0 0 600px; }
+  .brand { color: #fff; margin-bottom: 30px; }
+  .brand img { box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+  h1 { font-size: 60px; margin-bottom: 18px; }
+  .lead { color: #ffe3d8; font-size: 22px; max-width: 520px; }
+  .stage { flex: 1; height: 560px; position: relative; }
+  .popup { position: absolute; left: 160px; top: 160px; color: #1f1f1f; box-shadow: 0 24px 50px rgba(80, 20, 0, .3); border-color: #c94a24; }
+  .toast { position: absolute; left: 60px; top: 42px; color: #1f1f1f; z-index: 2; box-shadow: 0 18px 40px rgba(80, 20, 0, .3); border-color: #c94a24; }
+</style></head><body>
+<div class="copy">
+  <div class="brand"><img src="../icons/icon128.png">JobPing</div>
+  <h1>Stop refreshing<br>your job search.</h1>
+  <p class="lead">Get a notification when a new job shows up in your LinkedIn search.</p>
+</div>
+<div class="stage">
+  <div class="toast">
+    <div class="t-app"><img src="../icons/icon16.png">JobPing</div>
+    <div class="t-title">New job detected!</div>
+    <div class="t-msg">Frontend Developer @ Brightlane Labs - 8 minutes ago</div>
+  </div>
+  <div class="popup">
+    <div class="p-head"><img src="../icons/icon48.png"><h2>JobPing</h2><div class="sw">On <span class="track"></span></div></div>
+    <div class="p-body">
+      <div class="card">
+        <div class="w-row"><div><div class="eyebrow">Watching</div><div class="w-title">Frontend Developer</div><div class="w-sub">São Paulo, Remote · every hour</div></div><span class="edit">Edit</span></div>
+        <div class="w-foot"><span>Next check at 14:30</span><span class="btn">Check now</span></div>
+      </div>
+      <div class="card list">
+        <div class="eyebrow">Recent jobs</div>
+        <div class="job"><span class="av">B</span><div class="ji"><div class="jt">Frontend Developer</div><div class="jm">Brightlane Labs · 8 minutes ago</div></div><span class="tag">Latest</span></div>
+        <div class="job"><span class="av">K</span><div class="ji"><div class="jt">React Engineer (Mid-level)</div><div class="jm">Kestrel Pay · 2 hours ago</div></div></div>
+        <div class="job"><span class="av">O</span><div class="ji"><div class="jt">Data Analyst</div><div class="jm">Orbita Saúde · 3 hours ago</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

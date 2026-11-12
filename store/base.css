@@ -1,0 +1,79 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; }
+body {
+  font: 16px/1.4 "Segoe UI", system-ui, sans-serif;
+  background: #f4f3f1;
+  color: #1f1f1f;
+  display: flex;
+  align-items: center;
+  padding: 0 90px;
+  gap: 70px;
+  position: relative;
+}
+.copy { flex: 1; }
+.brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 650; margin-bottom: 40px; }
+.brand img { width: 40px; height: 40px; border-radius: 9px; }
+h1 { font-size: 56px; line-height: 1.08; margin: 0 0 22px; font-weight: 700; letter-spacing: -1px; }
+h1 em { font-style: normal; color: #e4572e; }
+.lead { font-size: 21px; color: #5c5955; margin: 0; max-width: 470px; }
+.steps { margin: 34px 0 0; padding: 0; list-style: none; }
+.steps li { display: flex; gap: 14px; align-items: baseline; font-size: 19px; margin-bottom: 16px; color: #3a3835; }
+.steps b { color: #e4572e; font-size: 17px; min-width: 18px; }
+.fine { position: absolute; left: 90px; bottom: 34px; font-size: 13px; color: #9a968f; }
+
+.stage { position: relative; width: 470px; }
+
+/* popup mock */
+.popup {
+  width: 400px;
+  background: #f4f3f1;
+  border: 1px solid #dcd8d2;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 15px;
+  box-shadow: 0 18px 40px rgba(60, 40, 20, .12);
+}
+.p-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; background: #fff; border-bottom: 1px solid #e4e1dc; }
+.p-head img { width: 26px; height: 26px; border-radius: 6px; }
+.p-head h2 { margin: 0; font-size: 16px; font-weight: 650; flex: 1; }
+.sw { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #74716c; }
+.track { width: 34px; height: 19px; border-radius: 10px; background: #2f9e44; position: relative; }
+.track::after { content: ""; position: absolute; top: 2px; left: 17px; width: 15px; height: 15px; border-radius: 50%; background: #fff; }
+.p-body { padding: 13px; display: flex; flex-direction: column; gap: 11px; }
+.card { background: #fff; border: 1px solid #e4e1dc; border-radius: 8px; padding: 13px; }
+.eyebrow { font-size: 12px; color: #74716c; margin-bottom: 2px; }
+.w-title { font-size: 17px; font-weight: 600; }
+.w-sub { font-size: 13px; color: #74716c; }
+.w-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.edit { font-size: 13px; color: #e4572e; }
+.w-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 11px; padding-top: 11px; border-top: 1px solid #e4e1dc; font-size: 13px; color: #74716c; }
+.btn { padding: 5px 11px; border: 1px solid #e4e1dc; border-radius: 6px; font-size: 13px; color: #1f1f1f; background: #fff; }
+.btn.primary { background: #e4572e; border-color: #e4572e; color: #fff; padding: 8px 16px; font-size: 14px; }
+.list { padding: 0; }
+.list .eyebrow { padding: 11px 13px 6px; margin: 0; }
+.job { display: flex; gap: 11px; align-items: center; padding: 9px 13px; border-top: 1px solid #e4e1dc; }
+.av { width: 34px; height: 34px; border-radius: 7px; display: grid; place-items: center; font-weight: 600; color: #e4572e; background: #fbe9e3; flex-shrink: 0; }
+.ji { flex: 1; min-width: 0; }
+.jt { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jm { font-size: 13px; color: #74716c; }
+.tag { font-size: 11px; font-weight: 600; color: #e4572e; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
+.field { margin-bottom: 12px; }
+.field span { display: block; font-size: 13px; color: #74716c; margin-bottom: 4px; }
+.input { padding: 8px 10px; border: 1px solid #e4e1dc; border-radius: 6px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.input.focus { border-color: #e4572e; }
+
+/* windows-style notification */
+.toast {
+  width: 380px;
+  background: #fff;
+  border: 1px solid #dcd8d2;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 14px 34px rgba(60, 40, 20, .16);
+  font-size: 14px;
+}
+.t-app { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #74716c; margin-bottom: 10px; }
+.t-app img { width: 16px; height: 16px; border-radius: 3px; }
+.t-title { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.t-msg { color: #3a3835; }
+.t-btn { margin-top: 12px; text-align: center; padding: 7px; background: #f1efec; border-radius: 5px; font-size: 13px; }

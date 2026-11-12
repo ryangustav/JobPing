@@ -24,6 +24,16 @@ JobPing periodically checks a user-configured LinkedIn job search URL. When a ne
 
 ---
 
+## Disclaimer
+
+JobPing is not affiliated with LinkedIn. It opens your job search in the background and reads the first result, using your own session, at most once per hour.
+
+LinkedIn's [User Agreement](https://www.linkedin.com/legal/user-agreement) (section 8.2) doesn't allow browser extensions that scrape the site, so using JobPing may go against their terms. Use it at your own risk. More in the [Terms of Use](./TERMS_OF_USE.md) ([PT-BR](./TERMS_OF_USE-pt.md)). If you want something 100% official, LinkedIn has its own Job Alerts.
+
+If LinkedIn wants JobPing taken down or changed, I'll do it, just open an [issue](https://github.com/ryangustav/jobping/issues).
+
+---
+
 ## Features
 
 - Configure LinkedIn job search URL.  
@@ -87,6 +97,8 @@ Contributions are welcome:
 ---
 
 ## License
+
+See also the [Terms of Use](./TERMS_OF_USE.md) and [Privacy Policy](./PRIVACY_POLICY.md).
 
 This project is licensed under the **GNU General Public License version 3 (GPLv3)**.
 See the [LICENSE](./LICENSE) file or visit:

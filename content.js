@@ -16,36 +16,67 @@
 
 
 (function () {
-  try {
-    const timeEl = document.querySelector(".job-card-container__footer-item--highlighted");
-    const companyEl = document.querySelector(".artdeco-entity-lockup__subtitle.ember-view");
-    const linkEl = document.querySelector("a.job-card-container__link.job-card-list__title--link");
+  // injected twice sometimes (load + fallback)
+  if (window.__jobpingRunning) return;
+  window.__jobpingRunning = true;
 
-    const time = timeEl?.innerText.trim() || null;
-    const company = companyEl?.innerText.trim() || null;
-    const title = linkEl?.innerText.trim() || null;
-    const relativeLink = linkEl?.getAttribute("href") || null;
-    const fullLink = relativeLink ? `https://www.linkedin.com${relativeLink}` : null;
+  const start = Date.now();
+  const getText = (el) => el?.textContent.replace(/\s+/g, " ").trim() || null;
 
-    if (time && company && fullLink) {
-      chrome.runtime.sendMessage({
-        type: "jobDetected",
-        time,
-        title,
-        company,
-        link: fullLink
-      });
+  // new linkedin layout, classes are random so use componentkey
+  function readNew() {
+    const card = document.querySelector('div[role="button"][componentkey^="job-card-component-ref-"]');
+    if (!card) return null;
 
-    } else {
-      chrome.runtime.sendMessage({
-        type: "jobDetected",
-        error: "Missing job data (time, company, or link)."
-      });
-    }
-  } catch (err) {
-    chrome.runtime.sendMessage({
-      type: "jobDetected",
-      error: err.message
-    });
+    const id = card.getAttribute("componentkey").replace("job-card-component-ref-", "");
+    const ps = [...card.querySelectorAll("p")];
+
+    const title = getText(ps[0]?.querySelector('span[aria-hidden="true"]')) || getText(ps[0]);
+    const company = getText(ps[1]);
+    const timeP = ps.slice(1).find((p) => p.querySelector(':scope > span[aria-hidden="true"]'));
+    const time = getText(timeP?.querySelector(':scope > span[aria-hidden="true"]'));
+
+    return {
+      title,
+      company,
+      time,
+      link: /^\d+$/.test(id) ? `https://www.linkedin.com/jobs/view/${id}/` : null
+    };
   }
+
+  function readOld() {
+    const linkEl = document.querySelector("a.job-card-container__link.job-card-list__title--link");
+    if (!linkEl) return null;
+
+    const href = linkEl.getAttribute("href");
+    return {
+      title: getText(linkEl),
+      company: getText(document.querySelector(".artdeco-entity-lockup__subtitle")),
+      time: getText(document.querySelector(".job-card-container__footer-item--highlighted")),
+      link: href ? new URL(href, "https://www.linkedin.com").toString() : null
+    };
+  }
+
+  function tryRead() {
+    try {
+      const job = readNew() || readOld();
+
+      if (job?.company && job?.link) {
+        chrome.runtime.sendMessage({ type: "jobDetected", ...job, time: job.time || "" });
+        return;
+      }
+
+      // cards load after the page, keep trying for 15s
+      if (Date.now() - start < 15000) {
+        setTimeout(tryRead, 500);
+        return;
+      }
+
+      chrome.runtime.sendMessage({ type: "jobDetected", error: "No job card found." });
+    } catch (err) {
+      chrome.runtime.sendMessage({ type: "jobDetected", error: err.message });
+    }
+  }
+
+  tryRead();
 })();

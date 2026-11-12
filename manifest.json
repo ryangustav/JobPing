@@ -2,20 +2,26 @@
   "manifest_version": 3,
   "name": "JobPing",
   "author": "ryangustav",
-  "version": "1.0",
-  "description": "Receba alertas de novas vagas no LinkedIn",
+  "version": "1.1.0",
+  "description": "Checks a LinkedIn job search every few hours and notifies you when a new job shows up.",
   "permissions": ["storage", "notifications", "tabs", "scripting", "alarms"],
   "host_permissions": ["https://www.linkedin.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
   "background": {
     "service_worker": "background.js"
+  },
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
